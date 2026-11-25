@@ -1,446 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="xseek">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>xseek | Open tools for cross-seeding</title>
+  <meta name="description" content="Self-hosted utilities for finding matching releases across your trackers and filling gaps between them.">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%23080808'/><rect width='62' height='62' x='1' y='1' rx='15' stroke='%23282828' stroke-width='1.5' fill='none'/><text x='21' y='40.5' font-family='Geist, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif' font-size='34' font-weight='800' fill='%23FFFFFF' text-anchor='middle'>x</text><text x='44.5' y='40.5' font-family='Geist, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif' font-size='34' font-weight='800' fill='%23E5484D' text-anchor='middle'>s</text></svg>">
-  <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      --primary: #e5484d;
-      --foreground: #fffbfa;
-      --card: #080808;
-      --card-hover: #0e0e0e;
-      --border: #222222;
-      --border-hover: #333333;
-      --muted: #888888;
-    }
-
-    body {
-      background-color: #020202;
-      color: var(--foreground);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 3.5rem 1.5rem;
-      position: relative;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    /* Off-center droplet ripples background matching xseek-match */
-    .auth-abstract {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-      mask-image: radial-gradient(ellipse 35% 35% at 50% 50%, rgba(0, 0, 0, 0.25), black 95%);
-    }
-
-    .auth-abstract i {
-      position: absolute;
-      left: 74%;
-      top: 26%;
-      width: 140vmax;
-      height: 140vmax;
-      border: 1px solid rgba(229, 72, 77, 0.12);
-      border-radius: 50%;
-      transform: translate(-50%, -50%) scale(0.18);
-      opacity: 0;
-    }
-
-    @media (prefers-reduced-motion: no-preference) {
-      .auth-abstract i {
-        animation: auth-droplet 15s cubic-bezier(0.16, 0.45, 0.4, 1) infinite;
-      }
-      .auth-abstract i:nth-child(2) {
-        animation-delay: -5s;
-      }
-      .auth-abstract i:nth-child(3) {
-        animation-delay: -10s;
-      }
-    }
-
-    @keyframes auth-droplet {
-      0% {
-        transform: translate(-50%, -50%) scale(0.02);
-        opacity: 0;
-      }
-      12% {
-        opacity: 0.85;
-      }
-      65% {
-        opacity: 0.35;
-      }
-      100% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .auth-abstract i {
-        opacity: 0.3;
-        transform: translate(-50%, -50%) scale(0.35);
-      }
-      .auth-abstract i:nth-child(2) {
-        opacity: 0.2;
-        transform: translate(-50%, -50%) scale(0.65);
-      }
-      .auth-abstract i:nth-child(3) {
-        opacity: 0.1;
-        transform: translate(-50%, -50%) scale(0.95);
-      }
-    }
-
-    .wrapper {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 580px;
-      display: flex;
-      flex-direction: column;
-      gap: 2.25rem;
-    }
-
-    /* Org Header */
-    .org-header {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .org-brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.85rem;
-      text-decoration: none;
-      color: inherit;
-      width: fit-content;
-    }
-
-    .org-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: #0c0c0c;
-      border: 1.5px solid #262626;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -0.1em;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-    }
-
-    .org-icon .mark {
-      display: inline-flex;
-      align-items: center;
-      transform: translateY(-4.5px);
-    }
-
-    .org-icon .x {
-      color: #ffffff;
-    }
-
-    .org-icon .s {
-      color: var(--primary);
-    }
-
-    .org-title {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.035em;
-      color: #ffffff;
-    }
-
-    .org-tagline {
-      color: var(--muted);
-      font-size: 1.05rem;
-      line-height: 1.5;
-    }
-
-    /* Projects Section */
-    .section-title {
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #555555;
-      margin-bottom: 0.4rem;
-    }
-
-    .projects-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    /* Project Card */
-    .project-card {
-      display: block;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.6rem;
-      text-decoration: none;
-      color: inherit;
-      transition: all 0.18s ease-in-out;
-      position: relative;
-    }
-
-    .project-card:hover {
-      background: var(--card-hover);
-      border-color: var(--border-hover);
-      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.5);
-      transform: translateY(-1.5px);
-    }
-
-    .project-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      margin-bottom: 0.85rem;
-    }
-
-    .project-identity {
-      display: flex;
-      align-items: center;
-      gap: 0.95rem;
-    }
-
-    .project-name {
-      font-size: 1.35rem;
-      font-weight: 750;
-      letter-spacing: -0.025em;
-      color: #ffffff;
-      display: inline-flex;
-      align-items: center;
-      line-height: 1;
-      white-space: pre;
-    }
-
-    .project-name .dot {
-      color: #555555;
-      margin: 0 0.15rem;
-      font-weight: 400;
-    }
-
-    .project-name .match {
-      color: var(--primary);
-      font-weight: 700;
-    }
-
-    /* Animation on xseek match */
-    .xm-collapse {
-      --xm-start: 650ms;
-      display: inline-flex;
-      align-items: center;
-      line-height: 1;
-      white-space: pre;
-    }
-
-    @media (prefers-reduced-motion: no-preference) {
-      .xm-collapse .xm-x {
-        animation: xm-close 750ms cubic-bezier(0.65, 0, 0.35, 1) var(--xm-start) both;
-      }
-      .xm-collapse .xm-tuck {
-        display: inline-block;
-        overflow: hidden;
-        max-width: 1em;
-        animation: xm-tuck 750ms cubic-bezier(0.65, 0, 0.35, 1) var(--xm-start) both;
-      }
-
-      .project-card:hover .xm-collapse .xm-x {
-        animation: none;
-        letter-spacing: -0.02em;
-        transition: letter-spacing 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      .project-card:hover .xm-collapse .xm-tuck {
-        animation: none;
-        max-width: 1em;
-        opacity: 1;
-        transform: translateX(0);
-        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-    }
-
-    @keyframes xm-tuck {
-      to {
-        max-width: 0;
-        opacity: 0;
-        transform: translateX(-70%);
-      }
-    }
-
-    @keyframes xm-close {
-      from {
-        letter-spacing: -0.02em;
-      }
-      to {
-        letter-spacing: -0.13em;
-      }
-    }
-
-    .version-tag {
-      font-size: 0.82rem;
-      font-weight: 500;
-      color: #666666;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    }
-
-    .project-desc {
-      color: #a3a3a3;
-      font-size: 0.95rem;
-      line-height: 1.55;
-      margin-bottom: 1.15rem;
-    }
-
-    .project-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding-top: 0.9rem;
-      border-top: 1px solid #161616;
-    }
-
-    .tags {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .tag {
-      font-size: 0.75rem;
-      color: #777777;
-      background: #111111;
-      border: 1px solid #222222;
-      padding: 0.2rem 0.55rem;
-      border-radius: 6px;
-    }
-
-    .repo-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      font-size: 0.85rem;
-      color: #fffbfa;
-      font-weight: 500;
-      transition: color 0.15s ease;
-    }
-
-    .repo-link svg {
-      width: 14px;
-      height: 14px;
-      fill: currentColor;
-    }
-
-    .project-card:hover .repo-link {
-      color: #ff9b9f;
-    }
-
-    /* Footer */
-    .org-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: #444444;
-      font-size: 0.85rem;
-      padding-top: 0.5rem;
-    }
-
-    .org-footer a {
-      color: #666666;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      transition: color 0.15s ease;
-    }
-
-    .org-footer a:hover {
-      color: #ffffff;
-    }
-
-    .org-footer svg {
-      width: 15px;
-      height: 15px;
-      fill: currentColor;
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Droplet ripples background -->
-  <div class="auth-abstract" aria-hidden="true">
-    <i></i><i></i><i></i>
-  </div>
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#top" aria-label="xseek home">
+        <span class="brand-icon" aria-hidden="true"><span class="brand-x">x</span><span class="brand-s">s</span></span>
+        <span class="brand-wordmark">xseek</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="https://github.com/getxseek" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </nav>
+    </div>
+  </header>
 
-  <div class="wrapper">
-    <!-- Organization Header -->
-    <header class="org-header">
-      <div class="org-brand">
-        <div class="org-icon" aria-hidden="true">
-          <span class="mark"><span class="x">x</span><span class="s">s</span></span>
-        </div>
-        <h1 class="org-title">xseek</h1>
+  <main id="top">
+    <section class="hero hero-compact" aria-labelledby="hero-title">
+      <div class="hero-ripples" aria-hidden="true">
+        <i></i><i></i><i></i>
       </div>
-      <p class="org-tagline">Open tools for matching, indexer search, and media automation.</p>
-    </header>
 
-    <!-- Projects Section -->
-    <section>
-      <div class="section-title">Projects</div>
-      <div class="projects-list">
-        <a class="project-card" href="https://github.com/getxseek/xseek-match" target="_blank" rel="noopener noreferrer">
-          <div class="project-top">
-            <h2 class="project-name xm-collapse">
-              <span class="xm-x">x</span><span class="xm-tuck">s</span><span class="xm-tuck">e</span><span class="xm-tuck">e</span><span class="xm-tuck">k</span><span class="xm-tuck dot">&nbsp;·&nbsp;</span><span class="match">m</span><span class="xm-tuck match">a</span><span class="xm-tuck match">t</span><span class="xm-tuck match">c</span><span class="xm-tuck match">h</span>
-            </h2>
-            <span class="version-tag">v0.1.1</span>
-          </div>
-
-          <p class="project-desc">Find the same release across all your trackers through Prowlarr, with Sonarr, Radarr, and qui duplicate prevention.</p>
-
-          <div class="project-footer">
-            <div class="tags">
-              <span class="tag">Prowlarr</span>
-              <span class="tag">Release Matching</span>
-              <span class="tag">Docker</span>
-            </div>
-            <span class="repo-link">
-              <span>View repository</span>
-              <svg viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M6.22 3.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z"/></svg>
-            </span>
-          </div>
-        </a>
+      <div class="hero-content">
+        <h1 class="hero-title" id="hero-title">Open tools for cross-seeding.</h1>
+        <p class="hero-subtitle">Self-hosted utilities for finding matching releases across your trackers and filling gaps between them.</p>
       </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="org-footer">
-      <span>© 2026 xseek</span>
-      <a href="https://github.com/getxseek" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-        </svg>
-        <span>github.com/getxseek</span>
-      </a>
-    </footer>
-  </div>
+    <section class="section section-ruled section-compact" id="projects" aria-labelledby="projects-title">
+      <div class="container">
+        <h2 class="section-heading" id="projects-title">Projects</h2>
+
+        <div class="projects-grid">
+          <a class="project-card" href="./match/">
+            <div class="project-head">
+              <h3 class="project-title">xseek <span class="brand-dot">·</span> <span class="brand-red">match</span></h3>
+              <p class="project-status">Released · <span data-github-release="getxseek/xseek-match">v0.2.0</span></p>
+            </div>
+            <p class="body-prose">Cross-seeking tool and cross-seed optimizer for Prowlarr. Search all your indexers at once and pick the best copy.</p>
+            <span class="project-action">Open demo &amp; overview →</span>
+          </a>
+
+          <div class="project-card is-unavailable" aria-disabled="true">
+            <div class="project-head">
+              <h3 class="project-title">xseek <span class="brand-dot">·</span> <span class="brand-red">up</span></h3>
+              <p class="project-status">In progress · Unavailable</p>
+            </div>
+            <p class="body-prose">Wraps existing upload tools and surfaces opportunities to easily cross-upload content from one tracker to another.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p class="footer-meta">© 2026 xseek</p>
+      <div class="footer-links">
+        <a href="https://github.com/getxseek" target="_blank" rel="noopener noreferrer">github.com/getxseek</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
 </body>
 </html>

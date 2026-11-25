@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="xseek">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>xseek · match | Cross-seeking tool for Prowlarr</title>
+  <meta name="description" content="Cross-seeking tool and cross-seed optimizer for Prowlarr, with Sonarr, Radarr, qui, and Yata context.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%23080808'/><rect width='62' height='62' x='1' y='1' rx='15' stroke='%23282828' stroke-width='1.5' fill='none'/><text x='21' y='40.5' font-family='Geist, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif' font-size='34' font-weight='800' fill='%23FFFFFF' text-anchor='middle'>x</text><text x='44.5' y='40.5' font-family='Geist, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif' font-size='34' font-weight='800' fill='%23E5484D' text-anchor='middle'>s</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a class="brand" href="../" aria-label="Back to xseek home">
+        <span class="brand-icon" aria-hidden="true"><span class="brand-x">x</span><span class="brand-s">s</span></span>
+        <span class="brand-wordmark">xseek</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="https://github.com/getxseek/xseek-match" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="match-hero-title">
+      <div class="hero-ripples" aria-hidden="true">
+        <i></i><i></i><i></i>
+      </div>
+
+      <div class="hero-content">
+        <h1 class="hero-title" id="match-hero-title">xseek <span class="brand-dot">·</span> <span class="brand-red">match</span></h1>
+        <p class="hero-subtitle">Cross-seeking tool and cross-seed optimizer for Prowlarr, with Sonarr, Radarr, qui, and Yata context.</p>
+        <div class="hero-cta">
+          <a class="primary-button" href="https://github.com/getxseek/xseek-match" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+        </div>
+      </div>
+
+      <div class="workbench" id="demo" aria-label="Interactive xseek-match demo">
+        <div class="workbench-toolbar">
+          <div class="segmented" role="tablist" aria-label="Sample searches">
+            <button type="button" class="segmented-item is-active" role="tab" aria-selected="true" data-query="frasier">Frasier · S03</button>
+            <button type="button" class="segmented-item" role="tab" aria-selected="false" data-query="severance">Severance · S01</button>
+            <button type="button" class="segmented-item" role="tab" aria-selected="false" data-query="dune">Dune: Part Two · 2160p</button>
+          </div>
+
+          <div class="workbench-controls">
+            <label class="switch-control">
+              <input type="checkbox" id="prioritize-toggle" checked>
+              <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+              <span class="switch-label">Rank freeleech &amp; preferred first</span>
+            </label>
+
+            <div class="segmented" role="tablist" aria-label="Result view mode">
+              <button type="button" class="segmented-item is-active" role="tab" aria-selected="true" data-view="grouped">Grouped</button>
+              <button type="button" class="segmented-item" role="tab" aria-selected="false" data-view="all">All results</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="workbench-summary" id="workbench-summary"></div>
+        <div class="workbench-results" id="workbench-results" role="region" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="section section-ruled" id="screenshots" aria-labelledby="screenshots-title">
+      <div class="container">
+        <h2 class="section-heading" id="screenshots-title">Screenshots &amp; themes</h2>
+
+        <div class="stage-controls">
+          <div class="segmented" role="tablist" aria-label="App views">
+            <button type="button" class="segmented-item is-active" role="tab" aria-selected="true" data-shot="grouped">Search</button>
+            <button type="button" class="segmented-item" role="tab" aria-selected="false" data-shot="enrich">Enrichment</button>
+            <button type="button" class="segmented-item" role="tab" aria-selected="false" data-shot="overlap">Overlap</button>
+          </div>
+
+          <div class="segmented" role="tablist" aria-label="Live theme presets">
+            <button type="button" class="segmented-item is-active" role="tab" aria-selected="true" data-theme-id="xseek">xseek</button>
+            <button type="button" class="segmented-item" role="tab" aria-selected="false" data-theme-id="midnight">Midnight</button>
+            <button type="button" class="segmented-item" role="tab" aria-selected="false" data-theme-id="nord">Nord</button>
+            <button type="button" class="segmented-item" role="tab" aria-selected="false" data-theme-id="catppuccin">Catppuccin</button>
+            <button type="button" class="segmented-item" role="tab" aria-selected="false" data-theme-id="dracula">Dracula</button>
+          </div>
+        </div>
+
+        <div class="stage-frame">
+          <img id="stage-image" src="../assets/screenshot-hero.png" alt="xseek-match grouped search results" width="1280" height="720" loading="lazy">
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-ruled" id="quickstart" aria-labelledby="quickstart-title">
+      <div class="container">
+        <h2 class="section-heading" id="quickstart-title">Quick start</h2>
+        <p class="body-prose">Point xseek-match at your Prowlarr instance with Docker Compose and sign in from your browser.</p>
+
+        <div class="code-workbench">
+          <div class="code-header">
+            <span class="code-label">Docker Compose</span>
+            <button type="button" class="copy-button" id="copy-code-btn">Copy</button>
+          </div>
+          <pre class="code-block"><code id="deploy-code">mkdir xseek-match &amp;&amp; cd xseek-match
+curl -fsSLO https://raw.githubusercontent.com/getxseek/xseek-match/main/compose.yaml
+curl -fsSL -o .env https://raw.githubusercontent.com/getxseek/xseek-match/main/.env.example
+
+# Set PROWLARR_BASE_URL, PROWLARR_API_KEY, and APP_ORIGIN in .env
+docker compose up -d</code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p class="footer-meta">© 2026 xseek</p>
+      <div class="footer-links">
+        <a href="https://github.com/getxseek" target="_blank" rel="noopener noreferrer">github.com/getxseek</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../app.js"></script>
+  <script src="demo.js"></script>
+</body>
+</html>
